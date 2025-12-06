@@ -252,32 +252,70 @@
   }
 
   function openBuyModal(imageUrl, planId){
-    const tpl = document.getElementById('modal-template');
-    const node = tpl.content.cloneNode(true);
-    const modal = node.querySelector('.modal');
-    const body = node.getElementById('modal-body');
+  const tpl = document.getElementById('modal-template');
+  const node = tpl.content.cloneNode(true);
+  const modal = node.querySelector('.modal');
+  const body = node.getElementById('modal-body');
 
-    body.innerHTML = `<h3>Confirm Purchase</h3>
-      <p>Plan: <strong>${escapeHtml(planId)}</strong></p>
-      <div style="text-align:center;margin-top:8px">
-        <img src="${escapeHtml(imageUrl)}" alt="promo" style="max-width:100%;border-radius:8px" onerror="this.style.display='none'">
-      </div>
-      <p style="margin-top:12px">(This is a static demo — connect to payment gateway to accept real payments.)</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-        <button class="btn btn-ghost" id="cancel">Close</button>
-        <button class="btn btn-primary" id="confirm">Proceed to Pay</button>
-      </div>
-    `;
+  body.innerHTML = `
+    <h3>Confirm Purchase</h3>
+    <p>Plan: <strong>${escapeHtml(planId)}</strong></p>
 
-    document.body.appendChild(modal);
+    <div style="text-align:center;margin-top:8px">
+      <img src="${escapeHtml(imageUrl)}" style="max-width:100%;border-radius:8px">
+    </div>
 
-    modal.querySelector('#modal-close').addEventListener('click', ()=>modal.remove());
-    modal.querySelector('#cancel').addEventListener('click', ()=>modal.remove());
-    modal.querySelector('#confirm').addEventListener('click', ()=>{
-      alert('Simulated payment flow. Replace with real payment integration.');
-      modal.remove();
-    });
+    <div style="margin-top:12px;font-size:18px;font-weight:bold;color:red;text-align:center">
+      Time Left: <span id="timer">00:15</span>
+    </div>
+
+    <input type="text" id="utr" placeholder="Enter 12 Digit UTR"
+      maxlength="12"
+      style="width:100%;padding:10px;margin-top:12px;border-radius:8px;border:1px solid #ccc;font-size:16px">
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-ghost" id="cancel">Close</button>
+      <button class="btn btn-primary" id="confirm" disabled>Proceed to Pay</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const timerEl = modal.querySelector('#timer');
+  const utrEl = modal.querySelector('#utr');
+  const payBtn = modal.querySelector('#confirm');
+
+  let time = 15;
+  let timerDone = false;
+
+  const interval = setInterval(() => {
+    time--;
+    timerEl.textContent = "00:" + (time < 10 ? "0" + time : time);
+    if (time <= 0) {
+      clearInterval(interval);
+      timerEl.textContent = "00:00";
+      timerDone = true;
+      checkEnable();
+    }
+  }, 1000);
+
+  utrEl.addEventListener("input", () => {
+    utrEl.value = utrEl.value.replace(/\D/g, '');
+    checkEnable();
+  });
+
+  function checkEnable(){
+    payBtn.disabled = !(timerDone && utrEl.value.length === 12);
   }
+
+  modal.querySelector('#modal-close').addEventListener('click', ()=>modal.remove());
+  modal.querySelector('#cancel').addEventListener('click', ()=>modal.remove());
+
+  payBtn.addEventListener('click', ()=>{
+    alert('UTR Submitted: ' + utrEl.value);
+    modal.remove();
+  });
+}
 
   // Admin panel
   function renderAdmin(){
