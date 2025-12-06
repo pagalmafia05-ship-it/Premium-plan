@@ -67,6 +67,125 @@
   const DEFAULT_CONFIG = {
     imageUrl: 'qr.png', // put your image in repo under /assets and update path if needed
     plans: [
+      <style>
+  .box {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    max-width: 360px;
+    font-family: Arial, sans-serif;
+  }
+
+  .timer {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 8px 0;
+    color: red;
+  }
+
+  .utr-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+  }
+
+  .btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .btn {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .pay-btn {
+    background: #10b981;
+    color: white;
+  }
+
+  .pay-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .close-btn {
+    background: #eee;
+  }
+</style>
+
+<div class="box">
+
+  <!-- ✅ TIMER -->
+  <div>Time Remaining</div>
+  <div class="timer" id="timer">00:15</div>
+
+  <!-- ✅ UTR INPUT (Only 12 digits) -->
+  <input 
+    type="text" 
+    id="utr" 
+    class="utr-input" 
+    placeholder="Enter 12 digit UTR"
+    maxlength="12"
+  >
+
+  <!-- ✅ BUTTONS -->
+  <div class="btns">
+    <button class="btn close-btn">Close</button>
+    <button class="btn pay-btn" id="payBtn" disabled>Proceed to Pay</button>
+  </div>
+
+</div>
+
+<script>
+  let time = 15;
+  let timerDone = false;
+
+  const timerEl = document.getElementById("timer");
+  const utrEl = document.getElementById("utr");
+  const payBtn = document.getElementById("payBtn");
+
+  // ✅ TIMER LOGIC
+  const timerInterval = setInterval(() => {
+    time--;
+    timerEl.textContent = "00:" + (time < 10 ? "0" + time : time);
+
+    if (time <= 0) {
+      clearInterval(timerInterval);
+      timerEl.textContent = "00:00";
+      timerDone = true;
+      checkEnable();
+    }
+  }, 1000);
+
+  // ✅ Allow ONLY 12 digit number
+  utrEl.addEventListener("input", () => {
+    utrEl.value = utrEl.value.replace(/\D/g, ""); 
+    checkEnable();
+  });
+
+  // ✅ Enable button only when BOTH done
+  function checkEnable() {
+    if (utrEl.value.length === 12 && timerDone) {
+      payBtn.disabled = false;
+    } else {
+      payBtn.disabled = true;
+    }
+  }
+
+  // ✅ Pay click
+  payBtn.addEventListener("click", () => {
+    alert("UTR Submitted: " + utrEl.value);
+    // yahan backend/API add kar sakta hai tu
+  });
+</script>
       {
         id: 'basic',
         title: 'Basic',
